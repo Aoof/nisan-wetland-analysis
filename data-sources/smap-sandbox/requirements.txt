@@ -1,0 +1,8 @@
+earthaccess>=0.19
+h5py
+h5netcdf
+numpy
+pandas
+xarray
+pyproj
+matplotlib

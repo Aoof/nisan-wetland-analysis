@@ -1,0 +1,7 @@
+earthaccess>=0.19
+h5py
+numpy
+pandas
+rasterio
+pyproj
+matplotlib
