@@ -1,6 +1,0 @@
-earthaccess>=0.19
-numpy
-pandas
-rasterio
-pyproj
-matplotlib

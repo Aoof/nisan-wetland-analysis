@@ -1,0 +1,22 @@
+{
+  "places": [
+    { "id": "coatzacoalcos", "name": "Coatzacoalcos", "at": [-94.459, 18.134], "radiusKm": 5, "kind": "city" },
+    { "id": "minatitlan", "name": "Minatitlán", "at": [-94.546, 17.993], "radiusKm": 4, "kind": "city" },
+    { "id": "cosoleacaque", "name": "Cosoleacaque", "at": [-94.635, 17.999], "radiusKm": 3, "kind": "town" },
+    { "id": "nanchital", "name": "Nanchital", "at": [-94.405, 18.068], "radiusKm": 2.5, "kind": "town" },
+    { "id": "ixhuatlan", "name": "Ixhuatlán del Sureste", "at": [-94.389, 18.017], "radiusKm": 2.5, "kind": "town" },
+    { "id": "moloacan", "name": "Moloacán", "at": [-94.351, 17.985], "radiusKm": 2, "kind": "town" },
+    { "id": "jaltipan", "name": "Jáltipan", "at": [-94.714, 17.969], "radiusKm": 3, "kind": "town" },
+    { "id": "agua-dulce", "name": "Agua Dulce", "at": [-94.143, 18.142], "radiusKm": 3, "kind": "town" },
+    { "id": "las-choapas-n", "name": "Villa Cuichapa", "at": [-94.12, 17.89], "radiusKm": 3, "kind": "town" },
+    { "id": "tonala-wetlands", "name": "Tonalá River wetlands", "at": [-94.16, 18.06], "radiusKm": 6, "kind": "wetland" },
+    { "id": "pajaritos", "name": "Pajaritos lagoon", "at": [-94.39, 18.11], "radiusKm": 2.5, "kind": "wetland" }
+  ],
+  "gauges": [
+    { "id": "coatza-minatitlan", "name": "Coatzacoalcos River at Minatitlán", "at": [-94.525, 17.975], "places": ["minatitlan", "cosoleacaque", "ixhuatlan", "moloacan"] },
+    { "id": "coatza-port", "name": "Coatzacoalcos River at the port", "at": [-94.475, 18.125], "places": ["coatzacoalcos", "nanchital", "pajaritos"] },
+    { "id": "coatza-south", "name": "Upstream tributary (south)", "at": [-94.425, 17.825], "places": ["moloacan", "ixhuatlan"] },
+    { "id": "coatza-sw", "name": "Upstream (south-west)", "at": [-94.625, 17.775], "places": ["jaltipan", "cosoleacaque"] },
+    { "id": "tonala", "name": "Tonalá River", "at": [-94.125, 18.175], "places": ["agua-dulce", "tonala-wetlands", "las-choapas-n"] }
+  ]
+}
