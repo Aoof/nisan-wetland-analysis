@@ -10,18 +10,10 @@ from .store import set_status
 scheduler = AsyncIOScheduler()
 
 
-async def warm() -> None:
-    if dem.available():
-        await asyncio.to_thread(dem.grids)
-        set_status("dem-hand", "live", "Terrain layers ready")
-    else:
-        set_status("dem-hand", "unavailable", "Run data-sources/copernicus-dem-sandbox/fetch_dem.py")
-
-
 async def startup() -> None:
     """Order = what the first screen needs first: forecast + terrain, then the latest water map, then the rest."""
     set_status("radarsat", "unavailable", "Needs an EODMS account and SAR processing; not wired yet.")
-    await asyncio.gather(forecast.refresh(), warm())
+    await asyncio.gather(forecast.refresh(), dem.refresh())
     await opera.refresh("opera-dswx-s1")
     await asyncio.gather(opera.refresh("opera-dswx-hls"), nisar.refresh())
     for s in ("smap-l4", "swot-raster"):

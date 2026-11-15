@@ -96,3 +96,20 @@ def mgrs_tile_origin(tile: str):
 
 def utm_crs(zone: int) -> str:
     return f"+proj=utm +zone={zone} +datum=WGS84 +units=m +no_defs"
+
+
+UTM15N = "EPSG:32615"
+
+
+@lru_cache(maxsize=4)
+def utm_grid(res: float = 30.0):
+    """(transform, width, height) of a UTM 15N grid snapped to `res` metres that covers the AOI.
+
+    The 30 m version holds the terrain; SWOT uses the 100 m one. Snapped to whole cells.
+    """
+    w, s, e, n = BBOX
+    t = Transformer.from_crs(4326, UTM15N, always_xy=True)
+    xs, ys = t.transform([w, e, w, e], [s, s, n, n])
+    x0 = math.floor(min(xs) / res) * res
+    y1 = math.ceil(max(ys) / res) * res
+    return from_origin(x0, y1, res, res), math.ceil((max(xs) - x0) / res), math.ceil((y1 - min(ys)) / res)

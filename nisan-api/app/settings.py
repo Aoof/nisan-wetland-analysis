@@ -8,17 +8,19 @@ REPO = Path(__file__).resolve().parents[2]
 load_dotenv(REPO / "nisan-app" / ".env")
 
 DATA = Path(os.environ.get("NISAN_DATA", REPO / "nisan-api" / "data"))
-SANDBOXES = Path(os.environ.get("NISAN_SANDBOXES", REPO / "data-sources"))
 PLACES_JSON = REPO / "nisan-app" / "src" / "data" / "places.json"
 
-# Same box as every sandbox (W, S, E, N).
+# The lower Coatzacoalcos basin (W, S, E, N).
 BBOX = (-94.90, 17.60, -94.00, 18.30)
 
-EARTHDATA_TOKEN = os.environ.get("EARTHDATA_TOKEN", "")
+# Strip quotes and whitespace: `docker run --env-file` and some compose setups pass them through literally,
+# and a quoted token fails Earthdata login with a 401.
+EARTHDATA_TOKEN = os.environ.get("EARTHDATA_TOKEN", "").strip().strip("\"'").strip()
+os.environ["EARTHDATA_TOKEN"] = EARTHDATA_TOKEN  # earthaccess reads it from the environment
 
 CMR = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
 FLOOD_API = "https://flood-api.open-meteo.com/v1/flood"
 WEATHER_API = "https://api.open-meteo.com/v1/forecast"
 
-for sub in ("cmr", "browse", "passes", "nisar", "forecast", "series"):
+for sub in ("cmr", "browse", "passes", "nisar", "forecast", "series", "dem", "cache"):
     (DATA / sub).mkdir(parents=True, exist_ok=True)

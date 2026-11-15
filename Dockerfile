@@ -30,13 +30,12 @@ FROM python:3.12-slim-bookworm
 ENV PYTHONUNBUFFERED=1 \
     PATH=/app/nisan-api/.venv/bin:$PATH \
     NISAN_DATA=/data \
-    NISAN_SANDBOXES=/sandboxes \
     NISAN_STATIC=/app/web \
     NISAN_WEBROOT=/srv/www
 # libexpat1: the rasterio wheel's bundled GDAL links against it, and slim images leave it out.
 RUN apt-get update && apt-get install -y --no-install-recommends libexpat1 && rm -rf /var/lib/apt/lists/* \
  && useradd --system --uid 10001 --home /app nisan \
- && mkdir -p /data /sandboxes /srv/www && chown nisan /data /sandboxes /srv/www
+ && mkdir -p /data /srv/www && chown nisan /data /srv/www
 # Paths mirror the repo, so settings.py finds nisan-app/src/data/places.json without changes.
 COPY --from=deps /app/nisan-api/.venv /app/nisan-api/.venv
 COPY nisan-api/app /app/nisan-api/app
@@ -47,9 +46,8 @@ COPY --chown=nisan webroot/ /srv/www/
 WORKDIR /app/nisan-api
 USER nisan
 EXPOSE 8000
-# /data: everything the background jobs download and cut (keep it on a volume).
+# /data: everything the API fetches and caches: terrain (fetched once), satellite passes, SMAP/SWOT granule cuts.
 # /srv/www: webroot; share it with your ACME client (certbot --webroot -w /srv/www).
-# /sandboxes: optional data-sources folder; the DEM/HAND rasters go in copernicus-dem-sandbox/data/processed/.
 VOLUME ["/data"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4).status == 200 else 1)"

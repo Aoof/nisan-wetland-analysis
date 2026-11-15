@@ -3,7 +3,7 @@
 export type BBox = [west: number, south: number, east: number, north: number];
 export type LonLat = [lon: number, lat: number];
 
-/** Lower Coatzacoalcos basin, same box as every sandbox and the API. */
+/** Lower Coatzacoalcos basin, same box as the API. */
 export const AOI: { name: string; bbox: BBox } = { name: "coatzacoalcos", bbox: [-94.9, 17.6, -94.0, 18.3] };
 
 export type SourceId =
@@ -31,7 +31,6 @@ export interface SourceMeta {
   revisit: string;
   latency: string;
   auth: "none" | "earthdata" | "eodms";
-  sandbox?: string;
   caveats: string[];
   citation: string;
   color: string;

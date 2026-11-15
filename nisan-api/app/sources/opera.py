@@ -3,8 +3,7 @@
 Pipeline: CMR listing -> public BROWSE.png per MGRS tile (palette index == WTR class)
 -> georeference from the tile ID -> warp to the shared Web Mercator AOI grid (nearest)
 -> one GeoTIFF per pass. XYZ tiles, per-point history and per-place statistics all
-read those GeoTIFFs. When sentintel-sandbox's 30 m mosaics exist, build_pass is the
-single place to swap them in.
+read those GeoTIFFs. build_pass is the single place to swap in full 30 m granules later.
 """
 import asyncio
 import re

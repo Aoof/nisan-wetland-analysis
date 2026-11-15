@@ -3,7 +3,7 @@
 Independent check: rivers and lagoons in a DSWx pass must lie in DEM valleys, i.e. the
 mean height-above-nearest-drainage under 'open water' pixels is near zero. If the tile
 georeferencing were off by a few hundred metres this number jumps (4.9 km: 3.9 m -> 0.5 m
-when the origin was fixed). Needs a built pass and the DEM sandbox output.
+when the origin was fixed). Needs a built pass and the terrain in data/dem (dem.refresh()).
 """
 import numpy as np
 import pytest
@@ -18,7 +18,7 @@ PROD = "opera-dswx-s1"
 
 def _setup():
     if not dem.available():
-        pytest.skip("DEM sandbox output missing")
+        pytest.skip("terrain not fetched yet (data/dem)")
     rows = opera.index(PROD)
     if not rows:
         pytest.skip("no processed pass yet")

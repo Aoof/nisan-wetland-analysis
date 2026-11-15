@@ -2,8 +2,8 @@
 
 The browse PNG is a regular lat/lon grid whose corners are in the sibling KML
 (gx:LatLonQuad). We write it as an EPSG:4326 GeoTIFF; rio-tiler warps it to Web
-Mercator per tile, so there is no corner interpolation. When nisar-sandbox's
-classified 30 m rasters exist, they replace this source.
+Mercator per tile, so there is no corner interpolation. Water classes from the full
+GCOV product are not produced yet.
 """
 import asyncio
 import re
@@ -116,7 +116,7 @@ async def refresh() -> None:
                 await asyncio.to_thread(build, client, it)
         done = sum(path_for(i["id"]).exists() for i in items)
         set_status(SOURCE, "awaiting-data" if not done else "live",
-                   f"{len(items)} acquisitions ({len(useful)} cover the basin); backscatter image for the latest {min(KEEP, len(useful))}. Water classes need the nisar-sandbox export.",
+                   f"{len(items)} acquisitions ({len(useful)} cover the basin); backscatter image for the latest {min(KEEP, len(useful))}. Water classes are not produced yet.",
                    newest=items[-1]["t"] if items else None, found=len(items), processed=done)
     except Exception as e:
         set_status(SOURCE, "error", f"{type(e).__name__}: {e}")

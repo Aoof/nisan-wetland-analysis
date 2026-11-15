@@ -256,7 +256,7 @@ function research(): string {
       <p>${esc(m.answers)}</p><p class="note">${esc(m.sensor)}. ${esc(m.resolution)}, ${esc(m.revisit)}. Login: ${m.auth}.${st?.message ? ` ${esc(st.message)}` : ""}</p>
       <ul>${m.caveats.map((x) => `<li>${esc(x)}</li>`).join("")}</ul><p class="note">${esc(m.citation)}</p>
       ${c.endpoint.length ? `<b>API</b>${c.endpoint.map(spec).join("")}` : ""}<b>Upstream</b>${c.upstream.map(spec).join("")}
-      <div class="actions">${data.timelines[id]?.length ? `<button class="btn" data-export="obs" data-src="${id}">${data.timelines[id].length} acquisitions CSV</button>` : ""}${data.series[id] ? `<button class="btn" data-export="series" data-src="${id}">Series CSV</button>` : ""}</div></details>`;
+      <div class="actions">${data.timelines[id]?.length ? `<button class="btn" data-export="obs" data-src="${id}">${data.timelines[id].length} acquisitions CSV</button>` : ""}${data.series[id]?.t.length ? `<button class="btn" data-export="series" data-src="${id}">Series CSV</button>` : ""}</div></details>`;
   }).join("");
   return `<div class="research">${cat}
     <h3>Risk thresholds (provisional)</h3>

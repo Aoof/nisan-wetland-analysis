@@ -120,9 +120,11 @@ def passes(prod: str, request: Request):
 
 @app.get("/api/series/{source}")
 def series(source: str, request: Request):
-    s = earthdata.series(source) if source in earthdata.SPECS else None
-    if not s:
-        raise HTTPException(404, "no values yet")
+    if source not in earthdata.SPECS:
+        raise HTTPException(404, "unknown source")
+    s = earthdata.series(source)
+    if not s:  # first fill still running: an empty series, re-asked for soon
+        return cached(request, {"t": [], "pending": True, "status": get_status().get(source, {}).get("message", "")}, max_age=60, swr=0)
     return cached(request, s, max_age=300, swr=3600)
 
 

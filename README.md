@@ -15,11 +15,10 @@ services:
       args:
         CARTO_API_KEY: ${CARTO_API_KEY}   # baked into the web bundle; public by design, restrict it to your domain
     environment:
-      EARTHDATA_TOKEN: ${EARTHDATA_TOKEN} # runtime only, never in the bundle
+      EARTHDATA_TOKEN: ${EARTHDATA_TOKEN} # runtime only, never in the bundle; needed for SMAP and SWOT
     volumes:
       - nisan-data:/data                  # downloaded passes, forecasts, caches
       - nisan-webroot:/srv/www            # served at /: ACME challenges, robots.txt, ... (see webroot/README.md)
-      # - ./nisan-sandboxes:/sandboxes:ro # optional: copernicus-dem-sandbox/data/processed/*.tif enables HAND terrain
     ports:
       - "8000:8000"
     restart: unless-stopped
@@ -40,4 +39,6 @@ volumes:
 
 Anything in `/srv/www` is served at the site root ahead of the web app, so `/.well-known/acme-challenge/<token>` works as soon as the ACME client writes it. A named volume starts with the repo's `webroot/` contents; a bind mount (`./webroot:/srv/www`) works too.
 
-Keep it to one replica: the refresh jobs run inside the process. On first start the jobs fill `/data` (about 50 MB for the current basin); later starts reuse it.
+Keep it to one replica: the refresh jobs run inside the process.
+
+The API fetches all of its data itself and caches it in `/data`; there is nothing to prepare by hand. On first start it downloads the terrain (Copernicus GLO-30 elevation and HAND, about a minute, public), the latest radar and optical water maps and NISAR images (public), and with `EARTHDATA_TOKEN` the SMAP soil moisture (one granule a day, last 45 days, about 11 s each) and SWOT water levels (last 120 days). Only the basin's part of each file is read. Later refreshes only fetch what is new; the cache stays around 150 MB.

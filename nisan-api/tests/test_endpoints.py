@@ -49,3 +49,12 @@ def test_empty_tile_is_a_valid_png():
         if kind == b"IDAT":
             assert zlib.decompress(body) == b"\x00" * 5
         i += 12 + n
+
+
+def test_series_unknown_source_is_404_and_known_is_json(monkeypatch):
+    from app.sources import earthdata
+
+    assert client.get("/api/series/nope").status_code == 404
+    monkeypatch.setattr(earthdata, "series", lambda source: None)
+    j = client.get("/api/series/smap-l4").json()
+    assert j["t"] == [] and j["pending"] is True
