@@ -1,15 +1,22 @@
 """XYZ PNG tiles from GeoTIFFs via rio-tiler. Nearest-neighbour: classes must never be blended."""
+import struct
+import zlib
 from pathlib import Path
 
 from fastapi import Response
 from rio_tiler.errors import TileOutsideBounds
 from rio_tiler.io import Reader
 
-# 1x1 transparent PNG for tiles outside a raster
-EMPTY = bytes.fromhex(
-    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
-    "0000000d4944415478da63fcffff3f0300050001a5f645400000000049454e44ae426082"
-)
+def _empty_png() -> bytes:
+    """1x1 fully transparent RGBA PNG, built rather than hard-coded so the checksums are always right."""
+    def chunk(kind: bytes, body: bytes) -> bytes:
+        return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body) & 0xFFFFFFFF)
+    ihdr = struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0)
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(b"\x00\x00\x00\x00\x00")) + chunk(b"IEND", b"")
+
+
+# for tiles outside a raster
+EMPTY = _empty_png()
 HEADERS = {"Cache-Control": "public, max-age=31536000, immutable"}
 
 

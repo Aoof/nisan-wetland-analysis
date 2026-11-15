@@ -175,3 +175,7 @@ details.src summary { cursor: pointer; display: flex; align-items: center; gap: 
   .legend { top: auto; bottom: calc(var(--bottom) + 8px); right: 8px; max-width: 46vw; }
   .tb-ctrl { min-width: 120px; padding: 0 8px; }
 }
+
+/* river gauges are drawn as small dark-ringed dots so they are not mistaken for zone pins */
+.legend i.gauge-key { width: 8px; height: 8px; border-radius: 50%; border: 2.5px solid #1F2937; background: #fff; margin: 0 2px; }
+.popup-reasons { margin: 6px 0 0; padding-left: 16px; font-size: 12px; color: var(--ink2); }

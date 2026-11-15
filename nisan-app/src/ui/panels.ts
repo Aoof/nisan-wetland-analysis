@@ -263,11 +263,11 @@ function research(): string {
     <table class="tbl">
       <tr><td>River flow ÷ usual: watch, warning, emergency</td><td>${th.dischargeRatio.watch}, ${th.dischargeRatio.warning}, ${th.dischargeRatio.emergency}×</td></tr>
       <tr><td>Rain in 72 hours</td><td>${th.rain72h.watch}, ${th.rain72h.warning}, ${th.rain72h.emergency} mm</td></tr>
-      <tr><td>Soil saturation: watch, warning</td><td>${th.wetness.watch * 100}, ${th.wetness.warning * 100} %</td></tr>
+      <tr><td>Soil saturation: wet, saturated (lowers rain thresholds to 75 %, 50 %)</td><td>${th.wetness.watch * 100}, ${th.wetness.warning * 100} %</td></tr>
       <tr><td>Basin water vs. median</td><td>+${th.basinWater.watch * 100}, +${th.basinWater.warning * 100}, +${th.basinWater.emergency * 100} %</td></tr>
       ${Object.entries(HAND).map(([k, c]) => `<tr><td>HAND class ${k}: ${esc(c.label)}</td><td>exposure ${c.exposure}</td></tr>`).join("")}
     </table>
-    <p class="note">A zone takes its strongest hazard signal, lowered one step where under 15 % of it is low ground. A point takes the hazard shifted by its HAND class.</p></div>`;
+    <p class="note">Hazard drivers are river flow (10-day forecast peak), rain in the next 72 hours and water seen by radar. Soil saturation is not a driver on its own: from 75 % it lowers the rain thresholds by a quarter, from 85 % by half. When two or more drivers are above normal, the level goes up one step. A zone is lowered one step where under 15 % of it is low ground. A point off any zone takes the hazard shifted by its HAND class; selecting a zone shows the zone verdict everywhere.</p></div>`;
 }
 
 export function wireSettings(root: HTMLElement, s: Settings, update: (patch: Partial<Settings>) => void, refresh: () => void, close: () => void) {

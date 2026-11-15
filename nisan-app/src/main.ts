@@ -6,7 +6,7 @@ import { api, type PointResponse } from "./data/api";
 import { loadSettings, saveSettings, type Settings, type View } from "./data/settings";
 import { boot, data, refreshNow, subscribe, want, type Topic } from "./data/store";
 import { peakRatio } from "./fusion/forecast";
-import { allSignals, answerFor, PLACES, zoneRisks, type PlaceAnswer, type ZoneRisk } from "./fusion/risk";
+import { allSignals, answerFor, PLACES, zoneRisk, zoneRisks, type PlaceAnswer, type ZoneRisk } from "./fusion/risk";
 import { LEVEL_COLOR, MapView } from "./ui/map";
 import * as P from "./ui/panels";
 import { Timebar } from "./ui/timebar";
@@ -42,7 +42,7 @@ function schedule(...parts: string[]) {
     const d = new Set(dirty);
     dirty.clear();
     if (d.has("zones")) { state.zones = zoneRisks(state.t); state.signals = allSignals(state.t); }
-    if (d.has("answer") && state.selected) state.answer = answerFor(state.selected.at, state.t, state.point);
+    if (d.has("answer") && state.selected && !state.pointLoading) state.answer = answerFor(state.selected.at, state.t, state.point, zoneFor(state.selected));
     if (d.has("layers")) drawLayers();
     if (d.has("rows")) setRows();
     if (d.has("band")) renderBand();
@@ -51,6 +51,12 @@ function schedule(...parts: string[]) {
     if (d.has("panel")) renderPanel();
     if (d.has("sheet") && !sheet.hidden) renderSheet();
   });
+}
+
+/** A selection made from a zone (list, pin, search) is judged as that zone, so every surface shows the same level. */
+function zoneFor(sel: { at: LonLat; name?: string } | null): ZoneRisk | undefined {
+  const p = sel?.name ? PLACES.find((x) => x.name === sel.name && x.at[0] === sel.at[0] && x.at[1] === sel.at[1]) : undefined;
+  return p ? state.zones.find((z) => z.place.id === p.id) ?? zoneRisk(p, state.t) : undefined;
 }
 
 /* ───────── time → which pass to show ───────── */
@@ -89,9 +95,9 @@ function drawLayers() {
     f && state.settings.view === "authorities" ? {
       type: "FeatureCollection",
       features: f.gauges.map((g) => {
-        let i = -1; g.t.forEach((d, k) => { if (d <= state.t) i = k; });
-        const q = i >= 0 ? g.q[i] : null, c = i >= 0 ? g.clim50[i] : null;
-        return { type: "Feature", geometry: { type: "Point", coordinates: g.cell }, properties: { id: g.id, name: g.name, ratio: q != null && c ? q / c : -1 } };
+        // Same quantity the zones use: the forecast peak over the next 10 days, not today's flow.
+        const pk = peakRatio(g, state.t);
+        return { type: "Feature", geometry: { type: "Point", coordinates: g.cell }, properties: { id: g.id, name: g.name, ratio: pk ? pk.ratio : -1 } };
       }),
     } : null,
     (id, at) => {
@@ -116,7 +122,10 @@ function renderLegend() {
   if (s.optical) items.push(dot("#7aa6d8", "Optical water"));
   if (s.hand) items.push(dot("#c62828", "Within 1 m of the river"), dot("#d9622b", "1 to 5 m above the river"));
   if (s.nisar) items.push(dot("#6b7280", "NISAR radar image"));
-  if (s.view === "authorities") items.push(...(["normal", "watch", "warning", "emergency"] as const).map((l) => dot(LEVEL_COLOR[l], `Zone: ${l}`)));
+  if (s.view === "authorities") {
+    items.push(...(["normal", "watch", "warning", "emergency"] as const).map((l) => dot(LEVEL_COLOR[l], `Zone: ${l}`)));
+    items.push(`<span><i class="gauge-key"></i>River gauge: 10-day peak vs. usual flow</span>`);
+  }
   legend.innerHTML = items.join("");
 }
 
@@ -218,11 +227,11 @@ async function select(at: LonLat, name?: string, fly = false) {
   }
   if (ac.signal.aborted) return;
   state.pointLoading = false;
-  state.answer = answerFor(at, state.t, state.point);
+  state.answer = answerFor(at, state.t, state.point, zoneFor(state.selected));
   if (state.settings.view === "authorities") {
     popup?.remove();
     const a = state.answer;
-    popup = new maplibregl.Popup({ maxWidth: "280px" }).setLngLat(at).setHTML(`<b>${P.esc(name ?? `${at[1].toFixed(4)}, ${at[0].toFixed(4)}`)}</b><br><span class="chip ${a.level}">${a.level}</span><p style="margin:6px 0 0">${P.esc(a.headline)}</p>`).addTo(view.map);
+    popup = new maplibregl.Popup({ maxWidth: "300px" }).setLngLat(at).setHTML(`<b>${P.esc(name ?? `${at[1].toFixed(4)}, ${at[0].toFixed(4)}`)}</b><br><span class="chip ${a.level}">${a.level}</span>${a.zone ? ` <small>zone verdict</small>` : ""}<p style="margin:6px 0 0">${P.esc(a.headline)}</p><ul class="popup-reasons">${a.reasons.slice(0, 3).map((r) => `<li>${P.esc(r)}</li>`).join("")}</ul>`).addTo(view.map);
   }
   schedule("panel");
 }

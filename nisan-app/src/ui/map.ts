@@ -52,7 +52,11 @@ export class MapView {
     });
     this.map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     this.map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
-    this.map.on("click", (ev) => onClick([ev.lngLat.lng, ev.lngLat.lat]));
+    this.map.on("click", (ev) => {
+      // A gauge has its own popup; without this the general click would replace it with a point answer.
+      if (this.map.getLayer("gauges") && this.map.queryRenderedFeatures(ev.point, { layers: ["gauges"] }).length) return;
+      onClick([ev.lngLat.lng, ev.lngLat.lat]);
+    });
     this.ready = new Promise((r) => this.map.once("load", () => r()));
     // setStyle() wipes our layers: put them back once the new basemap is in.
     this.map.on("style.load", () => this.restore());
@@ -141,7 +145,7 @@ export class MapView {
     this.map.addSource("gauges", { type: "geojson", data: this.gauges });
     this.map.addLayer({
       id: "gauges", type: "circle", source: "gauges",
-      paint: { "circle-radius": 7, "circle-stroke-width": 2, "circle-stroke-color": "#ffffff", "circle-color": ["step", ["get", "ratio"], "#6B7280", 0, LEVEL_COLOR.normal, 1.5, LEVEL_COLOR.watch, 2, LEVEL_COLOR.warning, 3, LEVEL_COLOR.emergency] },
+      paint: { "circle-radius": 5, "circle-stroke-width": 2.5, "circle-stroke-color": "#1F2937", "circle-color": ["step", ["get", "ratio"], "#6B7280", 0, LEVEL_COLOR.normal, 1.5, LEVEL_COLOR.watch, 2, LEVEL_COLOR.warning, 3, LEVEL_COLOR.emergency] },
     });
     this.map.off("click", "gauges", this.gaugeClick);
     this.map.on("click", "gauges", this.gaugeClick);
@@ -163,6 +167,7 @@ export class MapView {
       el.innerHTML = `<span class="zone-name">${zr.place.name}</span>`;
       el.addEventListener("click", (e) => { e.stopPropagation(); onPick(zr); });
       this.zoneMarkers.push(new maplibregl.Marker({ element: el }).setLngLat(zr.place.at).addTo(this.map));
+      el.setAttribute("aria-label", `${zr.place.name}: ${zr.level}`); // MapLibre replaces it with "Map marker"
     }
   }
 

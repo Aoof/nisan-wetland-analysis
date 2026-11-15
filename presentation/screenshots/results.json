@@ -1,0 +1,117 @@
+[
+  {
+    "name": "Overview loads with place chips",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "Overview place card uses the zone verdict",
+    "pass": true,
+    "info": "{\"a\":\"normal\",\"z\":\"normal\",\"zone\":\"coatzacoalcos\"}"
+  },
+  {
+    "name": "Clicking the map gives a point answer",
+    "pass": true,
+    "info": "{\"lv\":\"watch\",\"zone\":null,\"n\":7}"
+  },
+  {
+    "name": "Search by place name selects the place",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "Search by lat, lon selects the coordinates",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "Authorities band is visible",
+    "pass": true,
+    "info": "Watch\nAgua Dulce\nForecast updated 17 min ago. 11:58 AM"
+  },
+  {
+    "name": "Zone list, map pins, popup and answer agree (now)",
+    "pass": true,
+    "info": "agua-dulce=watch coatzacoalcos=normal minatitlan=normal cosoleacaque=normal nanchital=normal ixhuatlan=normal moloacan=normal jaltipan=normal las-choapas-n=normal tonala-wetlands=normal pajaritos=normal"
+  },
+  {
+    "name": "River gauge popup shows the 10-day peak",
+    "pass": true,
+    "info": "Coatzacoalcos River at the port Peak in the next 10 days: 1153 m³/s on Nov 21 (1.0× usual) ×"
+  },
+  {
+    "name": "Copy brief lists the same zones as the panel",
+    "pass": 1,
+    "info": "Zones above normal: Agua Dulce (WATCH)"
+  },
+  {
+    "name": "Zones CSV has a row per zone with matching levels",
+    "pass": true,
+    "info": "11 rows"
+  },
+  {
+    "name": "Previous-pass button moves the time back",
+    "pass": true,
+    "info": "2026-11-14T12:09:16.000Z"
+  },
+  {
+    "name": "Zone list, map pins, popup and answer agree (past pass 2026-11-07)",
+    "pass": true,
+    "info": "coatzacoalcos=normal minatitlan=normal cosoleacaque=normal nanchital=normal ixhuatlan=normal moloacan=normal jaltipan=normal agua-dulce=normal las-choapas-n=normal tonala-wetlands=normal pajaritos=normal"
+  },
+  {
+    "name": "Arrow keys move into the forecast window",
+    "pass": true,
+    "info": "2026-11-19T16:58:19.681Z"
+  },
+  {
+    "name": "Zone list, map pins, popup and answer agree (forecast +4 days)",
+    "pass": true,
+    "info": "coatzacoalcos=normal minatitlan=normal cosoleacaque=normal nanchital=normal ixhuatlan=normal moloacan=normal jaltipan=normal agua-dulce=normal las-choapas-n=normal tonala-wetlands=normal pajaritos=normal"
+  },
+  {
+    "name": "Basemap switches (dark, satellite, light)",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "Layer and detail toggles persist in settings",
+    "pass": true,
+    "info": "{\"view\":\"authorities\",\"basemap\":\"light\",\"water\":true,\"hand\":true,\"optical\":true,\"nisar\":true,\"farm\":true,\"research\":true}"
+  },
+  {
+    "name": "Research export downloads a CSV",
+    "pass": true,
+    "info": "opera-dswx-s1-acquisitions.csv"
+  },
+  {
+    "name": "Refresh now runs without errors",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "Farm details render on the place card",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "Water history CSV downloads",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "Panel collapses",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "Mobile: no horizontal overflow",
+    "pass": true,
+    "info": ""
+  },
+  {
+    "name": "No console or page errors",
+    "pass": false,
+    "info": "InvalidStateError: The source image could not be decoded. | InvalidStateError: The source image could not be decoded. | InvalidStateError: The source image could not be decoded. | InvalidStateError: The source image could not be decoded. | InvalidStateError: The source image could not be decoded."
+  }
+]
