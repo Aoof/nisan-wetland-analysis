@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import json
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Query, Request, Response
@@ -12,6 +13,7 @@ from . import jobs, tiles
 from .settings import BBOX, DATA
 from .sources import dem, earthdata, forecast, nisar, opera
 from .store import get_status, load_status, now_iso
+from .web import web_files
 
 PRODS = list(opera.PRODUCTS)
 _bg: list[asyncio.Task] = []
@@ -157,3 +159,10 @@ def water_tile(layer: str, pass_id: str, z: int, x: int, y: int):
     if not p.exists():
         raise HTTPException(404)
     return tiles.png_tile(p, z, x, y, colormap=opera.COLORMAP)
+
+
+# Single-container deployments: the webroot (ACME challenges, robots.txt, ...) and the built web app at /,
+# so the browser calls /api on the same origin. Mounted last so every /api route above wins.
+_web = web_files(os.environ.get("NISAN_WEBROOT"), os.environ.get("NISAN_STATIC"))
+if _web:
+    app.mount("/", _web, name="web")

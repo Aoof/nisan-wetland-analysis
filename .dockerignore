@@ -1,0 +1,13 @@
+**/.git
+**/.env
+**/.env.*
+**/.venv
+**/__pycache__
+**/node_modules
+**/.pytest_cache
+nisan-app/dist
+nisan-api/data
+nisan-api/tests
+data-sources
+presentation
+**/*.md

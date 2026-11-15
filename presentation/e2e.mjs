@@ -4,7 +4,7 @@ import { chromium } from "playwright";
 import fs from "node:fs";
 import path from "node:path";
 
-const BASE = "http://localhost:5173";
+const BASE = process.env.BASE ?? "http://localhost:5173";
 const OUT = process.argv[2];
 fs.mkdirSync(OUT, { recursive: true });
 const results = [];
@@ -91,7 +91,7 @@ try {
 
   /* gauge popup */
   await page.evaluate(() => window.nisan.view.map.jumpTo({ center: [-94.52, 17.98], zoom: 10.5 })); await settle(page, 2000);
-  const gpos = await page.evaluate(() => { const m = window.nisan.view.map; const f = m.queryRenderedFeatures({ layers: ["gauges"] })[0]; if (!f) return null; const p = m.project(f.geometry.coordinates); return { x: p.x, y: p.y, ratio: f.properties.ratio }; });
+  const gpos = await page.evaluate(() => { const m = window.nisan.view.map; const r = m.getCanvas().getBoundingClientRect(); const f = m.queryRenderedFeatures({ layers: ["gauges"] }).find((g) => { const q = m.project(g.geometry.coordinates); return document.elementFromPoint(r.left + q.x, r.top + q.y)?.tagName === "CANVAS"; }); if (!f) return null; const p = m.project(f.geometry.coordinates); return { x: p.x, y: p.y, ratio: f.properties.ratio }; });
   if (gpos) {
     const box = await page.locator("#map").boundingBox();
     await page.mouse.click(box.x + gpos.x, box.y + gpos.y); await settle(page, 1000);

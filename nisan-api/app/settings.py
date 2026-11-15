@@ -8,7 +8,7 @@ REPO = Path(__file__).resolve().parents[2]
 load_dotenv(REPO / "nisan-app" / ".env")
 
 DATA = Path(os.environ.get("NISAN_DATA", REPO / "nisan-api" / "data"))
-SANDBOXES = REPO / "data-sources"
+SANDBOXES = Path(os.environ.get("NISAN_SANDBOXES", REPO / "data-sources"))
 PLACES_JSON = REPO / "nisan-app" / "src" / "data" / "places.json"
 
 # Same box as every sandbox (W, S, E, N).
