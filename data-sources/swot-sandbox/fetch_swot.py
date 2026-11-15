@@ -67,7 +67,7 @@ def worker(url, cache_dir):
     import earthaccess
     import xarray as xr
 
-    strategy = "environment" if os.environ.get("EARTHDATA_USERNAME") else "netrc"
+    strategy = "environment" if (os.environ.get("EARTHDATA_USERNAME") or os.environ.get("EARTHDATA_TOKEN")) else "netrc"
     if not earthaccess.login(strategy=strategy).authenticated:
         raise RuntimeError("Earthdata login failed in worker")
     [f] = earthaccess.open([url], show_progress=False)

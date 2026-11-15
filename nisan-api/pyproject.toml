@@ -1,0 +1,34 @@
+[project]
+name = "nisan-api"
+version = "0.1.0"
+description = "Data API for the NISAN flood watch app"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "httpx>=0.27",
+  "rasterio>=1.4",
+  "rio-tiler>=7.0",
+  "numpy",
+  "pandas",
+  "pyproj",
+  "mgrs",
+  "apscheduler>=3.10",
+  "python-dotenv",
+  "earthaccess>=0.14",
+  "h5py",
+  "h5netcdf",
+  "xarray",
+]
+
+[dependency-groups]
+dev = [
+    "matplotlib>=3.11.2",
+    "pillow>=13.0.0",
+    "pytest",
+    "pytest-asyncio",
+    "scipy>=1.18.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -81,7 +81,7 @@ def read_l4(h5, rows, cols, expected_lat):
 
 
 def _login(earthaccess):
-    strategy = "environment" if os.environ.get("EARTHDATA_USERNAME") else "netrc"
+    strategy = "environment" if (os.environ.get("EARTHDATA_USERNAME") or os.environ.get("EARTHDATA_TOKEN")) else "netrc"
     auth = earthaccess.login(strategy=strategy)
     if not auth.authenticated:
         raise RuntimeError("Earthdata login failed in worker")

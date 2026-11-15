@@ -172,7 +172,7 @@ def worker(url, keep_backscatter):
 
     import earthaccess
 
-    strategy = "environment" if os.environ.get("EARTHDATA_USERNAME") else "netrc"
+    strategy = "environment" if (os.environ.get("EARTHDATA_USERNAME") or os.environ.get("EARTHDATA_TOKEN")) else "netrc"
     if not earthaccess.login(strategy=strategy).authenticated:
         raise RuntimeError("Earthdata login failed in worker")
     # Large blocks + cache: HDF5 makes many small reads, HTTPS round trips are slow.
