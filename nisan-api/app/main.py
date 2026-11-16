@@ -163,8 +163,8 @@ def water_tile(layer: str, pass_id: str, z: int, x: int, y: int):
     return tiles.png_tile(p, z, x, y, colormap=opera.COLORMAP)
 
 
-# Single-container deployments: the webroot (ACME challenges, robots.txt, ...) and the built web app at /,
-# so the browser calls /api on the same origin. Mounted last so every /api route above wins.
-_web = web_files(os.environ.get("NISAN_WEBROOT"), os.environ.get("NISAN_STATIC"))
+# Single-container deployments: the built web app at /, so the browser calls /api on the same origin.
+# Mounted last so every /api route above wins.
+_web = web_files(os.environ.get("NISAN_STATIC"))
 if _web:
     app.mount("/", _web, name="web")

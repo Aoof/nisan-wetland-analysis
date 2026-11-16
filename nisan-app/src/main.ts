@@ -8,6 +8,7 @@ import { boot, data, refreshNow, subscribe, want, type Topic } from "./data/stor
 import { peakRatio } from "./fusion/forecast";
 import { allSignals, answerFor, PLACES, zoneRisk, zoneRisks, type PlaceAnswer, type ZoneRisk } from "./fusion/risk";
 import { LEVEL_COLOR, MapView } from "./ui/map";
+import { initIntro } from "./ui/intro";
 import * as P from "./ui/panels";
 import { Timebar } from "./ui/timebar";
 
@@ -179,12 +180,13 @@ function renderSheet() {
   const top = sheet.scrollTop;
   sheet.innerHTML = P.settingsSheet(state.settings);
   P.wireSettings(sheet, state.settings, update, () => refreshNow(), closeSheet);
+  sheet.querySelector('[data-act="about"]')?.addEventListener("click", () => intro.open());
   sheet.scrollTop = top;
 }
 function openSheet() { sheet.hidden = false; $("settingsBtn").setAttribute("aria-expanded", "true"); renderSheet(); }
 function closeSheet() { sheet.hidden = true; $("settingsBtn").setAttribute("aria-expanded", "false"); }
 $("settingsBtn").addEventListener("click", () => (sheet.hidden ? openSheet() : closeSheet()));
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !sheet.hidden) closeSheet(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !sheet.hidden && !document.querySelector("dialog[open]")) closeSheet(); });
 
 function update(patch: Partial<Settings>) {
   state.settings = { ...state.settings, ...patch };
@@ -287,5 +289,6 @@ renderLegend();
 renderPanel();
 wantTimelines();
 boot();
+const intro = initIntro();
 Object.assign(window, { nisan: { state, data, view, select, update, setView } });
 void RISK_ORDER;

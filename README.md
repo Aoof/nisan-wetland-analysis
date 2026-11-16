@@ -1,44 +1,66 @@
-# NASA SpaceApps Challenges
-## NISAN: Wetlands and floodplains analysis
+# NISAN: flood and wetland watch for the lower Coatzacoalcos basin
 
-Use NISAR radar data to map how wetlands and floodplains expand and shrink over time, and use that history to predict where water will go next.
+NISAN maps how the wetlands and floodplains of the lower Coatzacoalcos basin in Veracruz, Mexico, grow and shrink over time, and uses that history to show where water is likely to go next.
 
-## Docker
+## Why NISAN
 
-One image serves the web app at `/` and the data API at `/api` (see `Dockerfile`).
+Several satellites watch this basin, and each one sees a different part of the water cycle. Radar from Sentinel-1 picks up open water through cloud. NASA and ISRO's new NISAR satellite uses a longer radar wavelength that reaches water hidden under mangroves and swamp forest. SMAP measures how wet the soil is, SWOT measures how high rivers and lagoons stand, and river and rain forecasts add what is still to come. A digital elevation model tells us how far each spot sits above the nearest stream. On their own, these datasets live in different archives, in different formats, and mostly in the hands of specialists. NISAN brings them together on one map that anyone can read.
 
-```yaml
-services:
-  nisan:
-    build:
-      context: ./nisan-wetland-analysis
-      args:
-        CARTO_API_KEY: ${CARTO_API_KEY}   # baked into the web bundle; public by design, restrict it to your domain
-    environment:
-      EARTHDATA_TOKEN: ${EARTHDATA_TOKEN} # runtime only, never in the bundle; needed for SMAP and SWOT
-    volumes:
-      - nisan-data:/data                  # downloaded passes, forecasts, caches
-      - nisan-webroot:/srv/www            # served at /: ACME challenges, robots.txt, ... (see webroot/README.md)
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
+The same information serves very different people. Someone living near the river may need to know whether to act now. A farmer may want an educated guess about when the ground is dry enough to plant, or how wet the coming week will be. A local authority may want to see which districts are rising and share a short brief. A researcher may want the readings themselves. NISAN starts every answer with a plain risk level (normal, watch, warning or emergency), the reasons behind it and what to do, and keeps the deeper layers, charts and downloads one step away for anyone who wants them.
 
-  # Optional: certificates via HTTP-01. Port 80 must reach the nisan service (directly or through your proxy).
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - nisan-webroot:/srv/www
-      - ./letsencrypt:/etc/letsencrypt
-    command: certonly --webroot -w /srv/www -d flood.example.com --email you@example.com --agree-tos -n
-    profiles: ["certs"]                   # run on demand: docker compose run --rm certbot
+We want people to be able to see, understand and communicate the data, so the rules that turn readings into a risk level are deliberately simple. Each instrument contributes a signal that is easy to picture: the river is twice its usual flow, a certain amount of rain is forecast, the radar sees more water than usual, the ground is already saturated. Every verdict lists the signals that produced it, and the thresholds are published inside the app. Places that are wet most of the year are shown as wetland, lagoon or river rather than as floods, so they don't raise false alarms. Every reading shows its age, because some satellites only pass every few days or weeks and people acting on the data need to know how current it is.
 
-volumes:
-  nisan-data:
-  nisan-webroot:
+We built NISAN in two days for the NASA Space Apps Challenge, so this version covers one test area. We chose the lower Coatzacoalcos basin because our team has personal ties to it, it floods often, and cities, farmland and wetlands sit side by side within a small area. Next we want to add more basins, get more out of the data each satellite collects, and study better ways to present it.
+
+NISAN isn't an official warning service. In an emergency, follow your local civil protection instructions. The thresholds are provisional and have not been reviewed by a local authority.
+
+## Using the app
+
+The Overview answers one question for any spot in the basin: is water coming here? You can search a street, a town or a `lat, lon` pair, or tap the map. The answer card shows the level, the reasons, what to do, and the water history at that spot as seen by radar.
+
+The Authorities view ranks the 11 named zones, marks the ones that rose in the last 24 hours, shows each river gauge's forecast peak for the next 10 days, and puts a data-age clock next to every source. From there you can copy a plain-text brief or download a CSV of all zones.
+
+A time bar along the bottom runs from 120 days of past satellite passes to 30 days of forecast. Moving it recomputes every zone and answer for that moment. Settings holds the basemap, the extra layers (optical water and the NISAR radar image), soil and rain charts for farm use, and research tools with every source's description, caveats, thresholds and exports.
+
+## How it works
+
+The project has two parts that ship as one Docker image. The data API in [`nisan-api/`](nisan-api) is written in Python with FastAPI. Background jobs in [`jobs.py`](nisan-api/app/jobs.py) fetch every source on a schedule, read only the part of each file that covers the basin, put every raster on a shared grid ([`geo.py`](nisan-api/app/geo.py)) and cache the results on disk. Each upstream has its own module in [`app/sources/`](nisan-api/app/sources). The API answers every request from that cache, so a slow satellite archive never holds up the map, and the NASA Earthdata token stays on the server.
+
+The web app in [`nisan-app/`](nisan-app) is TypeScript with MapLibre GL. It opens on the last saved copy of the data from the browser's IndexedDB, then refreshes in the background ([`store.ts`](nisan-app/src/data/store.ts)). The risk rules live in [`risk.ts`](nisan-app/src/fusion/risk.ts) and [`forecast.ts`](nisan-app/src/fusion/forecast.ts) and run in the browser. The 11 zones and 5 river gauges are defined once in [`places.json`](nisan-app/src/data/places.json), which both halves read.
+
+The full design is in [docs/architecture.md](docs/architecture.md), and every rule and threshold is in [docs/risk-model.md](docs/risk-model.md).
+
+## Quick start
+
+With Docker, one container serves the app at `/` and the API at `/api`:
+
+```bash
+docker build -t nisan --build-arg CARTO_API_KEY=your-carto-key .
 ```
 
-Anything in `/srv/www` is served at the site root ahead of the web app, so `/.well-known/acme-challenge/<token>` works as soon as the ACME client writes it. A named volume starts with the repo's `webroot/` contents; a bind mount (`./webroot:/srv/www`) works too.
+```bash
+docker run -d -p 8000:8000 -e EARTHDATA_TOKEN=your-token -v nisan-data:/data nisan
+```
 
-Keep it to one replica: the refresh jobs run inside the process.
+Open `http://localhost:8000`. On first start the API downloads the terrain and the latest maps in the background, and the app fills in as data arrives. `EARTHDATA_TOKEN` is only needed for SMAP and SWOT. Run a single replica, because the refresh jobs run inside the process. [docs/deployment.md](docs/deployment.md) covers Compose, configuration and volumes, and [docs/development.md](docs/development.md) covers running the API and the app locally.
 
-The API fetches all of its data itself and caches it in `/data`; there is nothing to prepare by hand. On first start it downloads the terrain (Copernicus GLO-30 elevation and HAND, about a minute, public), the latest radar and optical water maps and NISAR images (public), and with `EARTHDATA_TOKEN` the SMAP soil moisture (one granule a day, last 45 days, about 11 s each) and SWOT water levels (last 120 days). Only the basin's part of each file is read. Later refreshes only fetch what is new; the cache stays around 150 MB.
+## Documentation
+
+| Document | Covers |
+|---|---|
+| [Architecture](docs/architecture.md) | Components, data flow, refresh schedule, caching, code map |
+| [Risk model](docs/risk-model.md) | How levels are computed, every threshold, known limits |
+| [Data sources](docs/data-sources.md) | Each dataset, how we fetch it, credits |
+| [API reference](docs/api.md) | Every `/api` route |
+| [Deployment](docs/deployment.md) | Docker, configuration, operating notes |
+| [Development](docs/development.md) | Running locally, tests, common changes |
+| [Design](docs/design.md) | Visual and interaction rules |
+| [Roadmap](docs/roadmap.md) | Open questions and next steps |
+
+## Team
+
+NISAN was built by Andres Lara-Trevino, Abdulrahman Mousa and Edicson Garcia.
+
+## Credits
+
+Data from NASA (OPERA, NISAR with ISRO, SMAP, SWOT with CNES), Copernicus (GLO-30 DEM, GloFAS), ECMWF via Open-Meteo, and ASF. Basemaps © CARTO and OpenStreetMap contributors; imagery © Esri. Full citations are in [docs/data-sources.md](docs/data-sources.md).

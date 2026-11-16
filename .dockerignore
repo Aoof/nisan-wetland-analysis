@@ -8,5 +8,4 @@
 nisan-app/dist
 nisan-api/data
 nisan-api/tests
-presentation
 **/*.md

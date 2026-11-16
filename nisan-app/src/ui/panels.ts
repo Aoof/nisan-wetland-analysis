@@ -242,6 +242,10 @@ export function settingsSheet(s: Settings, now = new Date()): string {
       <div class="actions"><button class="btn" data-act="refresh">Refresh now</button></div>
       ${Object.keys(data.errors).length ? `<p class="note warn">Some data could not be loaded: ${Object.keys(data.errors).map(esc).join(", ")}. The app keeps working with what it has.</p>` : ""}
       ${data.timings.now ? `<p class="note">First data in ${data.timings["now-cache"] ?? data.timings.now} ms${data.timings["now-cache"] ? " from the saved copy" : ""}; fresh in ${data.timings.now} ms.</p>` : ""}
+    </section>
+    <section><h3>About</h3>
+      <p class="note">Built by Andres Lara-Trevino, Abdulrahman Mousa and Edicson Garcia for the NASA Space Apps Challenge.</p>
+      <div class="actions"><button class="btn" data-act="about">About NISAN</button></div>
     </section>`;
 }
 
