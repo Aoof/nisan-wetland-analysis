@@ -1,0 +1,31 @@
+# NISAN: web app at / and data API at /api, in one container.
+#
+# Secrets live in nisan-app/.env (git-ignored), the same file local development uses:
+#   CARTO_API_KEY=...     build time: inlined in the web bundle (public by design; restrict it to your domain)
+#   EARTHDATA_TOKEN=...   run time only: never in the image or the bundle; needed for SMAP and SWOT
+#
+# Start it with:
+#   docker compose --env-file nisan-app/.env up -d --build
+# --env-file makes CARTO_API_KEY available as a build argument; env_file below passes the token at run time.
+
+name: nisan
+
+services:
+  nisan:
+    build:
+      context: .
+      args:
+        CARTO_API_KEY: ${CARTO_API_KEY:-}
+    image: nisan:latest
+    env_file:
+      - path: nisan-app/.env
+        required: false
+    volumes:
+      - nisan-data:/data # terrain, satellite passes, forecasts and granule caches (~150 MB)
+    ports:
+      - "${NISAN_PORT:-8080}:8000"
+    restart: unless-stopped
+    # One replica only: the refresh jobs run inside the process.
+
+volumes:
+  nisan-data:

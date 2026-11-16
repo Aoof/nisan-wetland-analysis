@@ -32,14 +32,10 @@ The full design is in [docs/architecture.md](docs/architecture.md), and every ru
 
 ## Quick start
 
-With Docker, one container serves the app at `/` and the API at `/api`:
+One container serves the app at `/` and the API at `/api`. Put `CARTO_API_KEY` and `EARTHDATA_TOKEN` in `nisan-app/.env`, then run:
 
 ```bash
-docker build -t nisan --build-arg CARTO_API_KEY=your-carto-key .
-```
-
-```bash
-docker run -d -p 8000:8000 -e EARTHDATA_TOKEN=your-token -v nisan-data:/data nisan
+docker compose --env-file nisan-app/.env up -d --build
 ```
 
 Open `http://localhost:8000`. On first start the API downloads the terrain and the latest maps in the background, and the app fills in as data arrives. `EARTHDATA_TOKEN` is only needed for SMAP and SWOT. Run a single replica, because the refresh jobs run inside the process. [docs/deployment.md](docs/deployment.md) covers Compose, configuration and volumes, and [docs/development.md](docs/development.md) covers running the API and the app locally.

@@ -4,33 +4,30 @@ One image serves the web app at `/` and the data API at `/api` (see the [`Docker
 
 ## Build and run
 
+The repository ships a [`docker-compose.yml`](../docker-compose.yml). It reads the same `nisan-app/.env` used for local development: `CARTO_API_KEY` goes into the build, and `EARTHDATA_TOKEN` is passed to the container at run time only, so it never ends up in the image.
+
+```bash
+docker compose --env-file nisan-app/.env up -d --build
+```
+
+`--env-file` is what makes `CARTO_API_KEY` available to the build. Set `NISAN_PORT` in the same file to publish on a port other than 8000. Data is kept in the `nisan_nisan-data` volume across restarts and rebuilds.
+
+```bash
+docker compose logs -f nisan
+```
+
+```bash
+docker compose down
+```
+
+Without Compose, the equivalent commands are:
+
 ```bash
 docker build -t nisan --build-arg CARTO_API_KEY=your-carto-key .
 ```
 
 ```bash
 docker run -d -p 8000:8000 -e EARTHDATA_TOKEN=your-token -v nisan-data:/data --name nisan nisan
-```
-
-Or with Compose:
-
-```yaml
-services:
-  nisan:
-    build:
-      context: .
-      args:
-        CARTO_API_KEY: ${CARTO_API_KEY}   # baked into the web bundle; public by design
-    environment:
-      EARTHDATA_TOKEN: ${EARTHDATA_TOKEN} # runtime only, never in the bundle
-    volumes:
-      - nisan-data:/data
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-
-volumes:
-  nisan-data:
 ```
 
 ## Configuration
